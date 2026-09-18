@@ -2,115 +2,436 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080b12">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a0f19">
 <link rel="manifest" href="manifest.webmanifest">
-<title>MAFFOLONE — Galactic Rampage</title>
+<title>MAFFOLONE — Action Build</title>
 <style>
-:root{--bg:#080b12;--panel:#121825;--panel2:#192234;--text:#f5f7fb;--muted:#9eabc0;--line:#2a3951;--accent:#53d3ff;--gold:#ffd166}
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#080b12;color:var(--text)}
-.wrap{max-width:980px;margin:auto;padding:16px 14px 36px}h1{margin:0;font-size:34px}.muted{color:var(--muted)}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:12px}
-.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:24px}.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
-.room{min-height:105px;border:1px solid var(--line);border-radius:14px;background:#111824;color:#fff;padding:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px}
-.room:disabled{opacity:.34}.room.done{opacity:.45}.room .icon{font-size:28px}.room .value{color:var(--gold);font-weight:800}
-.side{display:grid;gap:10px;margin-top:10px}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 9px;margin:3px;font-size:13px}
-.btn{border:1px solid var(--line);background:#151d2a;color:white;padding:11px 14px;border-radius:12px;font-weight:700;margin-right:6px}
-@media(min-width:760px){.stats{grid-template-columns:repeat(4,1fr)}.layout{display:grid;grid-template-columns:1.6fr .8fr;gap:12px}.side{margin-top:0}}
+  :root{
+    --bg:#070b12; --panel:#111827; --panel2:#182337; --line:#29405a; --text:#edf2ff; --muted:#aebbd0;
+    --accent:#59d4ff; --good:#4fe0a1; --bad:#ff657c; --gold:#ffd166;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:radial-gradient(circle at 50% 0,#142338 0,#090d15 55%,#05080d 100%);color:var(--text);}
+  .wrap{max-width:960px;margin:0 auto;padding:12px 12px 28px}
+  h1{margin:0;font-size:34px;letter-spacing:.02em}
+  .sub{color:var(--muted);margin-top:2px}
+  .hud{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+  .stat small{display:block;color:var(--muted);font-size:11px}
+  .stat strong{font-size:26px}
+  .layout{display:grid;gap:12px}
+  @media(min-width:900px){.layout{grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr)}.hud{grid-template-columns:repeat(4,1fr)}}
+  canvas{width:100%;height:auto;display:block;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,#0f1624,#0b1018)}
+  .side{display:grid;gap:12px}
+  .title{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+  .muted{color:var(--muted)}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+  .pad{display:grid;grid-template-columns:64px 64px 64px;grid-template-rows:64px 64px 64px;gap:6px;justify-content:start}
+  .btn, .dir{
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;
+    border:1px solid var(--line);border-radius:16px;background:#162132;color:var(--text);
+    display:flex;align-items:center;justify-content:center;font-weight:800;
+  }
+  .dir{font-size:28px}
+  .dir.blank{visibility:hidden}
+  .btn{height:92px;font-size:22px}
+  .attack{background:linear-gradient(180deg,#4a1d25,#2b1117);border-color:#7e3e4a}
+  .attack:active,.dir:active,.smallbtn:active{transform:scale(.98)}
+  .smallbtn{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#151d2b;color:#fff;font-weight:700}
+  .pills{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{font-size:13px;padding:7px 10px;border-radius:999px;background:#0d131c;border:1px solid var(--line)}
+  .bar{height:12px;border-radius:999px;background:#0b0f16;border:1px solid var(--line);overflow:hidden}
+  .bar>div{height:100%;background:linear-gradient(90deg,#50c7ff,#62efb7);width:0%}
+  .note{font-size:13px;color:var(--muted);line-height:1.45}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>MAFFOLONE</h1>
-  <div class="muted">Galactic Rampage · Livello 1: ARK-77</div>
+  <div class="sub">Action Build v0.3 · Livello 1: ARK-77</div>
 
-  <div class="stats">
-    <div class="card stat"><small>ENERGIA</small><strong id="energy">5</strong></div>
-    <div class="card stat"><small>POTENZA TOTALE</small><strong id="total">5</strong></div>
-    <div class="card stat"><small>ARMA</small><strong id="weapon">🔪 Coltello</strong></div>
-    <div class="card stat"><small>XP LIVELLO</small><strong><span id="xp">0</span>/100</strong></div>
-  </div>
+  <section class="hud">
+    <div class="card stat"><small>ENERGIA</small><strong id="hudEnergy">5</strong></div>
+    <div class="card stat"><small>POTENZA TOTALE</small><strong id="hudPower">5</strong></div>
+    <div class="card stat"><small>ARMA</small><strong id="hudWeapon" style="font-size:20px">🔪 Coltello</strong></div>
+    <div class="card stat"><small>XP LIVELLO</small><strong><span id="hudXp">0</span>/100</strong></div>
+  </section>
 
   <div class="layout">
     <section class="card">
-      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:10px">
-        <div><strong>Interno stazione ARK-77</strong><div class="muted" style="font-size:12px">Scegli la sequenza giusta.</div></div>
-        <div id="objective" class="muted" style="font-size:12px;text-align:right">Raggiungi il ponte di comando</div>
+      <div class="title">
+        <div>
+          <strong>Stazione ARK-77</strong>
+          <div class="muted" style="font-size:12px">Muovi Maffolone in tempo reale. Attacca i nemici più deboli, raccogli armi e armature, poi affronta il boss.</div>
+        </div>
+        <div class="muted" id="objective" style="font-size:12px;text-align:right">Trova la via per il Custode Nero</div>
       </div>
-
-      <div class="rooms">
-        <button class="room" data-id="airlock"><span class="icon">🚪</span><strong>Ingresso</strong><span class="muted">Airlock 01</span></button>
-        <button class="room" data-id="enemy4"><span class="icon">👨‍🚀</span><strong>Astronauta infetto</strong><span class="value">⚡ 4</span></button>
-        <button class="room" data-id="junction"><span class="icon">🔀</span><strong>Bivio</strong><span class="muted">Due corridoi</span></button>
-        <button class="room" data-id="trap16"><span class="icon">👽</span><strong>Predatore</strong><span class="value">⚡ 16</span></button>
-        <button class="room" data-id="wall"><span class="icon">🧱</span><strong>Parete sospetta</strong><span class="muted">Condotto</span></button>
-        <button class="room" data-id="enemy11"><span class="icon">🤖</span><strong>Drone armato</strong><span class="value">⚡ 11</span></button>
-        <button class="room" data-id="armory"><span class="icon">🔒</span><strong>Armeria</strong><span class="muted">Porta magnetica</span></button>
-        <button class="room" data-id="enemy27"><span class="icon">👾</span><strong>Guardiano Xeno</strong><span class="value">⚡ 27</span></button>
-        <button class="room" data-id="crate"><span class="icon">📦</span><strong>Cassa militare</strong><span class="muted">Sigillata</span></button>
-        <button class="room" data-id="terminal"><span class="icon">📡</span><strong>Terminale</strong><span class="muted">Registro</span></button>
-        <button class="room" data-id="enemy18"><span class="icon">🧟</span><strong>Comandante infetto</strong><span class="value">⚡ 18</span></button>
-        <button class="room" data-id="boss"><span class="icon">☠️</span><strong>Custode Nero</strong><span class="value">⚡ 72</span></button>
-      </div>
+      <canvas id="game" width="820" height="1220"></canvas>
     </section>
 
     <aside class="side">
       <section class="card">
-        <h3 id="logTitle" style="margin-top:0">🛰️ Missione</h3>
-        <p id="logText">ARK-77 non risponde da 19 ore. Entra nella stazione e scopri cosa è successo.</p>
+        <strong id="logTitle">🛰️ Missione</strong>
+        <div id="logText" class="note" style="margin-top:8px">Muoviti con il pad. Premi ATTACCA quando sei vicino a un nemico. Se la tua potenza totale è superiore, lo distruggi e assorbi la sua energia.</div>
       </section>
-      <section class="card"><strong>Equipaggiamento</strong><div id="inventory" style="margin-top:8px"><span class="pill">🔪 Coltello +0</span></div></section>
-      <section class="card"><strong>Storia</strong><p id="storyText">Il Nucleo Rosso è solo un nome nei registri. Nessuno sa ancora cosa sia.</p></section>
-      <section><button class="btn" id="restart">↻ Ricomincia</button></section>
+
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px">
+          <strong>Equipaggiamento</strong>
+          <button class="smallbtn" id="restartBtn">↻ Ricomincia</button>
+        </div>
+        <div class="pills" id="inventory"></div>
+      </section>
+
+      <section class="card">
+        <strong>Progresso livello</strong>
+        <div class="bar" style="margin-top:10px"><div id="xpBar"></div></div>
+        <div class="note" id="storyText" style="margin-top:8px">Il Nucleo Rosso è ancora un mistero. La nave sembra abbandonata, ma qualcosa si muove tra i corridoi.</div>
+      </section>
+
+      <section class="card controls">
+        <div class="pad">
+          <div class="dir blank"></div>
+          <div class="dir" data-dir="up">▲</div>
+          <div class="dir blank"></div>
+          <div class="dir" data-dir="left">◀</div>
+          <div class="dir blank"></div>
+          <div class="dir" data-dir="right">▶</div>
+          <div class="dir blank"></div>
+          <div class="dir" data-dir="down">▼</div>
+          <div class="dir blank"></div>
+        </div>
+        <button class="btn attack" id="attackBtn">⚔️ ATTACCA</button>
+      </section>
+
+      <section class="card">
+        <strong>Oggetti di questo livello</strong>
+        <div class="note" style="margin-top:8px">
+          • Cassa militare: <b>Mazza gravitazionale +5</b><br>
+          • Baule segreto: <b>Elmetto +5</b><br>
+          • Cassa tecnica: <b>Scudo +5</b> e <b>combo armatura +5</b><br>
+          • Boss: <b>Custode Nero</b>
+        </div>
+      </section>
     </aside>
   </div>
 </div>
 
 <script>
-(function(){
-  const SAVE="maffolone_pwa_v1";
-  const req={airlock:[],enemy4:["airlock"],junction:["enemy4"],trap16:["junction"],wall:["junction"],enemy11:["junction"],armory:["wall","enemy11"],enemy27:["armory"],crate:["enemy27"],terminal:["enemy27"],enemy18:["enemy27"],boss:["crate","terminal","enemy18"]};
-  function fresh(){return {energy:5,xp:0,weapon:{name:"Coltello",icon:"🔪",bonus:0},armor:[],done:[],complete:false,story:"Il Nucleo Rosso è solo un nome nei registri. Nessuno sa ancora cosa sia."}}
-  let s=fresh();
-  try{const x=localStorage.getItem(SAVE);if(x)s=JSON.parse(x)}catch(e){}
-  function save(){try{localStorage.setItem(SAVE,JSON.stringify(s))}catch(e){}}
-  function isDone(id){return s.done.includes(id)} function mark(id){if(!isDone(id))s.done.push(id)}
-  function armorBonus(){let n=0;s.armor.forEach(a=>{if(a==="Elmetto")n+=5;if(a==="Scudo")n+=5});if(s.armor.length>=2)n+=5;return n}
-  function total(){return s.energy+s.weapon.bonus+armorBonus()} function addXp(n){s.xp=Math.min(100,s.xp+n)}
-  function can(id){return (req[id]||[]).every(isDone)}
-  function log(t,m){document.getElementById("logTitle").textContent=t;document.getElementById("logText").textContent=m}
-  function kill(id,name,val){if(total()<=val){log("⛔ Troppo forte",name+" ha potenza "+val+". Tu sei a "+total()+".");return false}s.energy+=val;addXp(1);mark(id);log("💥 Nemico eliminato",name+" sconfitto. Assorbi "+val+" energia.");return true}
-  function play(id){
-    if(isDone(id)||!can(id)||s.complete)return;
-    switch(id){
-      case "airlock":mark(id);addXp(5);log("🚪 Airlock aperto","Le luci d'emergenza lampeggiano.");break;
-      case "enemy4":kill(id,"Astronauta infetto",4);break;
-      case "junction":mark(id);addXp(5);log("🔀 Primo bivio","Una parete sembra cava.");break;
-      case "trap16":kill(id,"Predatore",16);break;
-      case "wall":mark(id);s.armor.push("Elmetto");addXp(15);log("🧱 Passaggio segreto","Trovi un Elmetto rinforzato: +5.");break;
-      case "enemy11":kill(id,"Drone armato",11);break;
-      case "armory":mark(id);s.weapon={name:"Mazza gravitazionale",icon:"🔨",bonus:5};addXp(15);log("🔨 Nuova arma","Mazza gravitazionale: +5.");break;
-      case "enemy27":kill(id,"Guardiano Xeno",27);break;
-      case "crate":mark(id);s.armor.push("Scudo");addXp(15);log("📦 Equipaggiamento","Scudo +5. Combo +5 attivata.");break;
-      case "terminal":mark(id);addXp(15);s.story="Registro 01: il Custode è arrivato dal settore superiore. Le navi alimentano il NUCLEO ROSSO.";log("📡 Registro 01",s.story);break;
-      case "enemy18":kill(id,"Comandante infetto",18);break;
-      case "boss":if(total()<=72){log("☠️ Custode Nero","Boss 72. Sei ancora troppo debole.");break}mark(id);s.energy+=72;addXp(29);s.complete=true;s.story="Il Custode Nero era solo il guardiano. Una navetta indica: PIATTAFORMA II.";log("🏆 VITTORIA","Custode Nero sconfitto. Potenza finale: "+total()+".");break;
+(() => {
+  const SAVE_KEY = 'maffolone_action_build_v03';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  const walkables = [
+    {x:50,y:980,w:220,h:150},
+    {x:270,y:960,w:270,h:170},
+    {x:560,y:900,w:210,h:150},
+    {x:90,y:760,w:180,h:130},
+    {x:290,y:740,w:250,h:150},
+    {x:275,y:535,w:245,h:130},
+    {x:560,y:485,w:210,h:135},
+    {x:270,y:320,w:225,h:125},
+    {x:55,y:150,w:180,h:120},
+    {x:590,y:235,w:170,h:115},
+    {x:240,y:1020,w:40,h:40},
+    {x:540,y:990,w:30,h:40},
+    {x:360,y:885,w:60,h:80},
+    {x:210,y:845,w:90,h:35},
+    {x:385,y:665,w:35,h:75},
+    {x:510,y:565,w:55,h:35},
+    {x:380,y:445,w:30,h:90},
+    {x:220,y:205,w:50,h:35},
+    {x:660,y:350,w:35,h:135}
+  ];
+
+  const levelLayout = {
+    enemies: [
+      {id:'e1', name:'Astronauta infetto', kind:'astronaut', power:4, x:395, y:1035, home:{x1:320,x2:490,y1:1000,y2:1090}, dir:1, speed:0.8, alive:true},
+      {id:'e2', name:'Alieno scarno', kind:'alien', power:6, x:165, y:810, home:{x1:115,x2:235,y1:785,y2:860}, dir:1, speed:0.9, alive:true},
+      {id:'e3', name:'Drone armato', kind:'robot', power:12, x:395, y:585, home:{x1:305,x2:490,y1:555,y2:635}, dir:1, speed:1.0, alive:true},
+      {id:'e4', name:'Bruto contaminato', kind:'brute', power:16, x:660, y:535, home:{x1:585,x2:735,y1:510,y2:585}, dir:1, speed:0.7, alive:true},
+      {id:'boss', name:'Custode Nero', kind:'boss', power:45, x:675, y:290, home:{x1:615,x2:735,y1:265,y2:315}, dir:1, speed:0.85, alive:true}
+    ],
+    items: [
+      {id:'w1', type:'weapon', name:'Mazza gravitazionale', bonus:5, x:620, y:965, collected:false, icon:'🔨'},
+      {id:'a1', type:'armor', piece:'Elmetto', name:'Elmetto rinforzato', bonus:5, x:145, y:210, collected:false, icon:'⛑️'},
+      {id:'a2', type:'armor', piece:'Scudo', name:'Scudo tattico', bonus:5, x:150, y:1045, collected:false, icon:'🛡️'}
+    ]
+  };
+
+  function freshState(){
+    return {
+      player:{x:350,y:1060,r:16,energy:5,weaponName:'Coltello',weaponIcon:'🔪',weaponBonus:0,armor:[],xp:0},
+      enemies: JSON.parse(JSON.stringify(levelLayout.enemies)),
+      items: JSON.parse(JSON.stringify(levelLayout.items)),
+      complete:false,
+      attackTimer:0,
+      attackFlash:0,
+      logTitle:'🛰️ Missione',
+      logText:'Muoviti con il pad. Premi ATTACCA quando sei vicino a un nemico.',
+      story:'Il Nucleo Rosso è ancora un mistero. La nave sembra abbandonata, ma qualcosa si muove tra i corridoi.'
+    };
+  }
+
+  let state = loadState();
+  const input = {up:false,down:false,left:false,right:false};
+  let last = performance.now();
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(SAVE_KEY);
+      if(raw){
+        const s = JSON.parse(raw);
+        if(s && s.player && typeof s.player.energy === 'number') return s;
+      }
+    }catch(e){}
+    return freshState();
+  }
+  function saveState(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
+  function resetGame(){ state = freshState(); saveState(); syncHud(); }
+
+  function armorBaseBonus(){
+    let n = 0;
+    state.player.armor.forEach(p => { if(p === 'Elmetto') n += 5; if(p === 'Scudo') n += 5; });
+    return n;
+  }
+  function armorComboBonus(){ return state.player.armor.length >= 2 ? 5 : 0; }
+  function totalPower(){ return state.player.energy + state.player.weaponBonus + armorBaseBonus() + armorComboBonus(); }
+  function setLog(title, text){
+    state.logTitle = title; state.logText = text;
+    document.getElementById('logTitle').textContent = title;
+    document.getElementById('logText').textContent = text;
+  }
+  function syncHud(){
+    document.getElementById('hudEnergy').textContent = state.player.energy;
+    document.getElementById('hudPower').textContent = totalPower();
+    document.getElementById('hudWeapon').textContent = state.player.weaponIcon + ' ' + state.player.weaponName;
+    document.getElementById('hudXp').textContent = state.player.xp;
+    document.getElementById('xpBar').style.width = state.player.xp + '%';
+    document.getElementById('objective').textContent = state.complete ? 'Livello completato' : 'Trova la via per il Custode Nero';
+    document.getElementById('storyText').textContent = state.story;
+    document.getElementById('logTitle').textContent = state.logTitle;
+    document.getElementById('logText').textContent = state.logText;
+    const inv = document.getElementById('inventory');
+    inv.innerHTML = '';
+    addPill(inv, state.player.weaponIcon + ' ' + state.player.weaponName + ' +' + state.player.weaponBonus);
+    state.player.armor.forEach(p => addPill(inv, '🛡️ ' + p + ' +5'));
+    if(state.player.armor.length >= 2) addPill(inv, '✨ Combo armatura +5');
+  }
+  function addPill(holder, text){ const el = document.createElement('span'); el.className = 'pill'; el.textContent = text; holder.appendChild(el); }
+  function addXp(n){ state.player.xp = Math.min(100, state.player.xp + n); }
+  function pointInRect(px, py, r){ return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h; }
+  function isWalkable(px, py){ return walkables.some(r => pointInRect(px, py, r)); }
+
+  function collectItems(){
+    for(const item of state.items){
+      if(item.collected) continue;
+      if(Math.hypot(state.player.x - item.x, state.player.y - item.y) < 28){
+        item.collected = true;
+        if(item.type === 'weapon'){
+          state.player.weaponName = item.name;
+          state.player.weaponIcon = item.icon;
+          state.player.weaponBonus = item.bonus;
+          addXp(12);
+          setLog('🔨 Arma trovata', item.name + ' raccolta! Bonus +' + item.bonus + ' potenza.');
+        }else{
+          if(!state.player.armor.includes(item.piece)) state.player.armor.push(item.piece);
+          addXp(12);
+          const extra = state.player.armor.length >= 2 ? ' Combo armatura +5 attivata.' : '';
+          setLog('🛡️ Armatura trovata', item.name + ' raccolto! Bonus +' + item.bonus + '.' + extra);
+        }
+        saveState(); syncHud();
+      }
     }
-    save();render();
   }
-  function render(){
-    document.getElementById("energy").textContent=s.energy;document.getElementById("total").textContent=total();
-    document.getElementById("weapon").textContent=s.weapon.icon+" "+s.weapon.name;document.getElementById("xp").textContent=s.xp;
-    document.getElementById("storyText").textContent=s.story;document.getElementById("objective").textContent=s.complete?"Livello completato":"Raggiungi il ponte di comando";
-    const inv=document.getElementById("inventory");inv.innerHTML="";let p=document.createElement("span");p.className="pill";p.textContent=s.weapon.icon+" "+s.weapon.name+" +"+s.weapon.bonus;inv.appendChild(p);
-    s.armor.forEach(a=>{let x=document.createElement("span");x.className="pill";x.textContent="🛡️ "+a;inv.appendChild(x)});
-    if(s.armor.length>=2){let x=document.createElement("span");x.className="pill";x.textContent="✨ Combo +5";inv.appendChild(x)}
-    document.querySelectorAll(".room").forEach(b=>{const id=b.dataset.id;b.disabled=isDone(id)||!can(id)||s.complete;b.classList.toggle("done",isDone(id))});
+
+  function attack(){
+    if(state.complete) return;
+    state.attackTimer = 16;
+    state.attackFlash = 10;
+    const pwr = totalPower();
+    let hitSomething = false;
+    for(const enemy of state.enemies){
+      if(!enemy.alive) continue;
+      const d = Math.hypot(state.player.x - enemy.x, state.player.y - enemy.y);
+      if(d <= 58){
+        hitSomething = true;
+        if(pwr > enemy.power){
+          enemy.alive = false;
+          state.player.energy += enemy.power;
+          addXp(enemy.id === 'boss' ? 40 : 1);
+          if(enemy.id === 'boss'){
+            state.complete = true;
+            state.story = 'Il Custode Nero è crollato. Una navetta automatica apre l’accesso alla PIATTAFORMA II.';
+            setLog('🏆 VITTORIA!', 'Hai sconfitto il Custode Nero e assorbito ' + enemy.power + ' energia. Livello completato!');
+          } else {
+            setLog('💥 Nemico sconfitto', enemy.name + ' eliminato. Assorbi ' + enemy.power + ' energia.');
+          }
+          saveState(); syncHud();
+        } else {
+          setLog('☠️ Troppo debole', enemy.name + ' ha potenza ' + enemy.power + '. Tu sei a ' + pwr + '. Riprova!');
+          resetGame();
+          return;
+        }
+      }
+    }
+    if(!hitSomething) setLog('⚔️ Colpo a vuoto', 'Nessun nemico abbastanza vicino.');
   }
-  document.querySelectorAll(".room").forEach(b=>b.addEventListener("click",()=>play(b.dataset.id)));
-  document.getElementById("restart").addEventListener("click",()=>{s=fresh();save();log("↻ Riavviato","Maffolone torna all'ingresso.");render()});
-  render();
-  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+
+  function updatePlayer(dt){
+    const speed = 2.6 * dt;
+    let dx = 0, dy = 0;
+    if(input.left) dx -= speed;
+    if(input.right) dx += speed;
+    if(input.up) dy -= speed;
+    if(input.down) dy += speed;
+    if(dx !== 0 && dy !== 0){ dx *= 0.72; dy *= 0.72; }
+    const nx = state.player.x + dx;
+    const ny = state.player.y + dy;
+    if(isWalkable(nx, state.player.y)) state.player.x = nx;
+    if(isWalkable(state.player.x, ny)) state.player.y = ny;
+
+    for(const enemy of state.enemies){
+      if(!enemy.alive) continue;
+      const d = Math.hypot(state.player.x - enemy.x, state.player.y - enemy.y);
+      if(d < 24 && totalPower() <= enemy.power){
+        setLog('☠️ Troppo debole', enemy.name + ' ti ha travolto. Riprova il livello.');
+        resetGame();
+        return;
+      }
+    }
+    collectItems();
+  }
+
+  function updateEnemies(dt){
+    for(const e of state.enemies){
+      if(!e.alive) continue;
+      if(e.home.x2 - e.home.x1 > e.home.y2 - e.home.y1){
+        e.x += e.speed * e.dir * dt;
+        if(e.x < e.home.x1 || e.x > e.home.x2){ e.dir *= -1; e.x = Math.max(e.home.x1, Math.min(e.home.x2, e.x)); }
+      } else {
+        e.y += e.speed * e.dir * dt;
+        if(e.y < e.home.y1 || e.y > e.home.y2){ e.dir *= -1; e.y = Math.max(e.home.y1, Math.min(e.home.y2, e.y)); }
+      }
+    }
+  }
+
+  function drawBackground(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = '#0a0f17';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let i=0;i<45;i++){ const x=(i*89)%canvas.width, y=(i*147)%canvas.height; ctx.fillStyle=i%3===0?'#16243a':'#101827'; ctx.fillRect(x,y,2,2); }
+    for(const r of walkables) drawPlatform(r.x,r.y,r.w,r.h);
+    drawStairs(362, 885, 56, 76, false);
+    drawStairs(387, 666, 30, 74, true);
+    drawStairs(380, 445, 30, 88, true);
+    drawStairs(662, 350, 30, 132, true);
+    drawStairs(212, 845, 86, 28, false);
+    drawStairs(510, 565, 55, 28, false);
+    drawStairs(220, 205, 50, 28, false);
+  }
+
+  function drawPlatform(x,y,w,h){
+    ctx.fillStyle = '#8d98ab22'; ctx.fillRect(x+8,y+10,w,h);
+    const grd = ctx.createLinearGradient(x,y,x,y+h);
+    grd.addColorStop(0,'#445066'); grd.addColorStop(.45,'#353f52'); grd.addColorStop(1,'#242d3a');
+    ctx.fillStyle = grd; roundRect(ctx, x,y,w,h,16,true,false);
+    ctx.strokeStyle = '#536782'; ctx.lineWidth = 2; roundRect(ctx, x,y,w,h,16,false,true);
+    ctx.fillStyle = '#2d3645'; roundRect(ctx, x+10, y+10, w-20, h-20, 10, true, false);
+    ctx.strokeStyle = '#425163'; ctx.lineWidth = 1;
+    for(let i=0;i<3;i++){ ctx.beginPath(); ctx.moveTo(x+18, y+30+i*28); ctx.lineTo(x+w-18, y+30+i*28); ctx.stroke(); }
+    for(let i=0;i<4;i++){ ctx.beginPath(); ctx.moveTo(x+30+i*45, y+18); ctx.lineTo(x+30+i*45, y+h-18); ctx.stroke(); }
+  }
+  function drawStairs(x,y,w,h,vertical){
+    ctx.fillStyle = '#6c778a'; roundRect(ctx,x,y,w,h,6,true,false);
+    ctx.strokeStyle = '#8892a3'; ctx.lineWidth = 1;
+    if(vertical){ for(let i=0;i<6;i++){ const yy = y + 8 + i*((h-16)/6); ctx.beginPath(); ctx.moveTo(x+4,yy); ctx.lineTo(x+w-4,yy); ctx.stroke(); } }
+    else { for(let i=0;i<6;i++){ const xx = x + 8 + i*((w-16)/6); ctx.beginPath(); ctx.moveTo(xx,y+4); ctx.lineTo(xx,y+h-4); ctx.stroke(); } }
+  }
+
+  function drawItems(){
+    for(const item of state.items){
+      if(item.collected) continue;
+      drawCrate(item.x-18, item.y-14, item.type==='weapon' ? '#7b52d7' : (item.piece==='Elmetto' ? '#d6a43b' : '#1fb7b3'));
+      ctx.font = '24px system-ui'; ctx.textAlign = 'center'; ctx.fillText(item.icon, item.x, item.y+6);
+    }
+  }
+  function drawCrate(x,y,color){ ctx.fillStyle = color; roundRect(ctx,x,y,36,28,6,true,false); ctx.fillStyle = '#f3c35c'; roundRect(ctx,x+13,y+8,10,12,2,true,false); }
+
+  function drawEnemy(e){
+    const x=e.x,y=e.y;
+    if(e.kind==='astronaut'){
+      ctx.fillStyle='#e9e4d0'; circle(x,y-8,14); ctx.fillStyle='#d7f0ff'; circle(x,y-9,10); ctx.fillStyle='#5b6f8a'; roundRect(ctx,x-10,y+4,20,16,5,true,false); ctx.fillStyle='#93a5bd'; roundRect(ctx,x-15,y+18,30,18,6,true,false);
+    }else if(e.kind==='alien'){
+      ctx.fillStyle='#7fe0b8'; circle(x,y-8,16); ctx.fillStyle='#101820'; circle(x-5,y-11,4); circle(x+5,y-11,4); ctx.fillStyle='#5fc89f'; roundRect(ctx,x-14,y+8,28,20,8,true,false);
+    }else if(e.kind==='robot'){
+      ctx.fillStyle='#97a3b7'; roundRect(ctx,x-16,y-24,32,28,7,true,false); ctx.fillStyle='#d85f8f'; circle(x-6,y-10,3); circle(x+6,y-10,3); ctx.fillStyle='#7d8aa1'; roundRect(ctx,x-14,y+8,28,20,7,true,false); ctx.strokeStyle='#9faac0'; ctx.beginPath(); ctx.moveTo(x-18,y+15); ctx.lineTo(x-28,y+20); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x+18,y+15); ctx.lineTo(x+28,y+20); ctx.stroke();
+    }else if(e.kind==='brute'){
+      ctx.fillStyle='#b9bcc7'; circle(x,y-10,16); ctx.fillStyle='#5c5a67'; roundRect(ctx,x-22,y+4,44,28,10,true,false); ctx.fillStyle='#404351'; roundRect(ctx,x-22,y+4,44,10,8,true,false);
+    }else if(e.kind==='boss'){
+      ctx.fillStyle='#1f1f26'; circle(x,y-16,20); ctx.fillStyle='#b73a52'; circle(x-8,y-18,3); circle(x+8,y-18,3); ctx.fillStyle='#2f313b'; roundRect(ctx,x-26,y+2,52,34,10,true,false); ctx.fillStyle='#4f5566'; roundRect(ctx,x-22,y+6,44,10,8,true,false);
+    }
+    ctx.textAlign='center'; ctx.font='bold 22px system-ui'; ctx.strokeStyle = '#00000088'; ctx.lineWidth = 5; const labelY = y - 36; ctx.strokeText(String(e.power), x, labelY); ctx.fillStyle = '#ff4f63'; ctx.fillText(String(e.power), x, labelY);
+  }
+
+  function drawPlayer(){
+    const p=state.player;
+    ctx.save(); if(state.attackFlash>0){ ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 18; }
+    ctx.fillStyle = '#f1c27d'; circle(p.x,p.y-10,14);
+    ctx.fillStyle = '#912f34'; roundRect(ctx,p.x-12,p.y-22,24,8,6,true,false);
+    ctx.fillStyle = '#2e6ad3'; roundRect(ctx,p.x-14,p.y+2,28,20,8,true,false);
+    ctx.fillStyle = '#243041'; roundRect(ctx,p.x-8,p.y+18,7,18,3,true,false); roundRect(ctx,p.x+1,p.y+18,7,18,3,true,false);
+    ctx.fillStyle = '#eef4ff'; roundRect(ctx,p.x+8,p.y+2,12,4,2,true,false);
+    ctx.restore();
+    if(state.attackTimer > 0){ ctx.beginPath(); ctx.arc(p.x, p.y, 48, -0.6, 0.9); ctx.strokeStyle = 'rgba(255,209,102,.8)'; ctx.lineWidth = 8; ctx.stroke(); }
+  }
+
+  function drawUIOverlay(){
+    ctx.fillStyle = '#cfe2ff'; ctx.font = 'bold 20px system-ui'; ctx.textAlign='center'; ctx.fillText('BAULE', 145, 140); ctx.fillText('BOSS', 675, 222);
+    ctx.font = '14px system-ui'; ctx.fillStyle = '#9fb0c5'; ctx.fillText('CASSA', 620, 930); ctx.fillText('ARMERIA', 150, 1018);
+    if(state.complete){
+      ctx.fillStyle = 'rgba(0,0,0,.55)'; roundRect(ctx,160,540,500,120,18,true,false);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 34px system-ui'; ctx.fillText('LIVELLO COMPLETATO!', 410, 590);
+      ctx.font = '18px system-ui'; ctx.fillText('Ora possiamo costruire la Piattaforma II.', 410, 625);
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+    if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
+    ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r); ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
+    if (fill) ctx.fill(); if (stroke) ctx.stroke();
+  }
+  function circle(x,y,r){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }
+
+  function frame(now){
+    const dt = Math.min(2.2, (now - last) / 16.6667); last = now;
+    updatePlayer(dt); updateEnemies(dt); if(state.attackTimer > 0) state.attackTimer -= dt; if(state.attackFlash > 0) state.attackFlash -= dt;
+    drawBackground(); drawItems(); state.enemies.forEach(e => { if(e.alive) drawEnemy(e); }); drawPlayer(); drawUIOverlay();
+    requestAnimationFrame(frame);
+  }
+
+  function bindDirButton(el, key){
+    const on = e => { e.preventDefault(); input[key] = true; };
+    const off = e => { e.preventDefault(); input[key] = false; };
+    el.addEventListener('touchstart', on, {passive:false});
+    el.addEventListener('touchend', off, {passive:false});
+    el.addEventListener('touchcancel', off, {passive:false});
+    el.addEventListener('mousedown', on);
+    el.addEventListener('mouseup', off);
+    el.addEventListener('mouseleave', off);
+  }
+  document.querySelectorAll('.dir[data-dir]').forEach(el => bindDirButton(el, el.dataset.dir));
+  document.getElementById('attackBtn').addEventListener('click', attack);
+  document.getElementById('attackBtn').addEventListener('touchstart', e => { e.preventDefault(); attack(); }, {passive:false});
+  document.getElementById('restartBtn').addEventListener('click', () => { resetGame(); setLog('↻ Riavviato','Maffolone torna all’ingresso della stazione.'); });
+  window.addEventListener('keydown', e => { if(e.key==='ArrowLeft') input.left=true; if(e.key==='ArrowRight') input.right=true; if(e.key==='ArrowUp') input.up=true; if(e.key==='ArrowDown') input.down=true; if(e.key===' ') attack(); });
+  window.addEventListener('keyup', e => { if(e.key==='ArrowLeft') input.left=false; if(e.key==='ArrowRight') input.right=false; if(e.key==='ArrowUp') input.up=false; if(e.key==='ArrowDown') input.down=false; });
+
+  syncHud(); requestAnimationFrame(frame);
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
 })();
 </script>
-</body></html>
+</body>
+</html>
