@@ -1,0 +1,9 @@
+{
+  "name": "MAFFOLONE — Galactic Rampage",
+  "short_name": "MAFFOLONE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080b12",
+  "theme_color": "#080b12",
+  "icons": []
+}

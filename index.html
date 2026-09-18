@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b12">
+<link rel="manifest" href="manifest.webmanifest">
+<title>MAFFOLONE — Galactic Rampage</title>
+<style>
+:root{--bg:#080b12;--panel:#121825;--panel2:#192234;--text:#f5f7fb;--muted:#9eabc0;--line:#2a3951;--accent:#53d3ff;--gold:#ffd166}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#080b12;color:var(--text)}
+.wrap{max-width:980px;margin:auto;padding:16px 14px 36px}h1{margin:0;font-size:34px}.muted{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:12px}
+.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:24px}.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.room{min-height:105px;border:1px solid var(--line);border-radius:14px;background:#111824;color:#fff;padding:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px}
+.room:disabled{opacity:.34}.room.done{opacity:.45}.room .icon{font-size:28px}.room .value{color:var(--gold);font-weight:800}
+.side{display:grid;gap:10px;margin-top:10px}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 9px;margin:3px;font-size:13px}
+.btn{border:1px solid var(--line);background:#151d2a;color:white;padding:11px 14px;border-radius:12px;font-weight:700;margin-right:6px}
+@media(min-width:760px){.stats{grid-template-columns:repeat(4,1fr)}.layout{display:grid;grid-template-columns:1.6fr .8fr;gap:12px}.side{margin-top:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MAFFOLONE</h1>
+  <div class="muted">Galactic Rampage · Livello 1: ARK-77</div>
+
+  <div class="stats">
+    <div class="card stat"><small>ENERGIA</small><strong id="energy">5</strong></div>
+    <div class="card stat"><small>POTENZA TOTALE</small><strong id="total">5</strong></div>
+    <div class="card stat"><small>ARMA</small><strong id="weapon">🔪 Coltello</strong></div>
+    <div class="card stat"><small>XP LIVELLO</small><strong><span id="xp">0</span>/100</strong></div>
+  </div>
+
+  <div class="layout">
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:10px">
+        <div><strong>Interno stazione ARK-77</strong><div class="muted" style="font-size:12px">Scegli la sequenza giusta.</div></div>
+        <div id="objective" class="muted" style="font-size:12px;text-align:right">Raggiungi il ponte di comando</div>
+      </div>
+
+      <div class="rooms">
+        <button class="room" data-id="airlock"><span class="icon">🚪</span><strong>Ingresso</strong><span class="muted">Airlock 01</span></button>
+        <button class="room" data-id="enemy4"><span class="icon">👨‍🚀</span><strong>Astronauta infetto</strong><span class="value">⚡ 4</span></button>
+        <button class="room" data-id="junction"><span class="icon">🔀</span><strong>Bivio</strong><span class="muted">Due corridoi</span></button>
+        <button class="room" data-id="trap16"><span class="icon">👽</span><strong>Predatore</strong><span class="value">⚡ 16</span></button>
+        <button class="room" data-id="wall"><span class="icon">🧱</span><strong>Parete sospetta</strong><span class="muted">Condotto</span></button>
+        <button class="room" data-id="enemy11"><span class="icon">🤖</span><strong>Drone armato</strong><span class="value">⚡ 11</span></button>
+        <button class="room" data-id="armory"><span class="icon">🔒</span><strong>Armeria</strong><span class="muted">Porta magnetica</span></button>
+        <button class="room" data-id="enemy27"><span class="icon">👾</span><strong>Guardiano Xeno</strong><span class="value">⚡ 27</span></button>
+        <button class="room" data-id="crate"><span class="icon">📦</span><strong>Cassa militare</strong><span class="muted">Sigillata</span></button>
+        <button class="room" data-id="terminal"><span class="icon">📡</span><strong>Terminale</strong><span class="muted">Registro</span></button>
+        <button class="room" data-id="enemy18"><span class="icon">🧟</span><strong>Comandante infetto</strong><span class="value">⚡ 18</span></button>
+        <button class="room" data-id="boss"><span class="icon">☠️</span><strong>Custode Nero</strong><span class="value">⚡ 72</span></button>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card">
+        <h3 id="logTitle" style="margin-top:0">🛰️ Missione</h3>
+        <p id="logText">ARK-77 non risponde da 19 ore. Entra nella stazione e scopri cosa è successo.</p>
+      </section>
+      <section class="card"><strong>Equipaggiamento</strong><div id="inventory" style="margin-top:8px"><span class="pill">🔪 Coltello +0</span></div></section>
+      <section class="card"><strong>Storia</strong><p id="storyText">Il Nucleo Rosso è solo un nome nei registri. Nessuno sa ancora cosa sia.</p></section>
+      <section><button class="btn" id="restart">↻ Ricomincia</button></section>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SAVE="maffolone_pwa_v1";
+  const req={airlock:[],enemy4:["airlock"],junction:["enemy4"],trap16:["junction"],wall:["junction"],enemy11:["junction"],armory:["wall","enemy11"],enemy27:["armory"],crate:["enemy27"],terminal:["enemy27"],enemy18:["enemy27"],boss:["crate","terminal","enemy18"]};
+  function fresh(){return {energy:5,xp:0,weapon:{name:"Coltello",icon:"🔪",bonus:0},armor:[],done:[],complete:false,story:"Il Nucleo Rosso è solo un nome nei registri. Nessuno sa ancora cosa sia."}}
+  let s=fresh();
+  try{const x=localStorage.getItem(SAVE);if(x)s=JSON.parse(x)}catch(e){}
+  function save(){try{localStorage.setItem(SAVE,JSON.stringify(s))}catch(e){}}
+  function isDone(id){return s.done.includes(id)} function mark(id){if(!isDone(id))s.done.push(id)}
+  function armorBonus(){let n=0;s.armor.forEach(a=>{if(a==="Elmetto")n+=5;if(a==="Scudo")n+=5});if(s.armor.length>=2)n+=5;return n}
+  function total(){return s.energy+s.weapon.bonus+armorBonus()} function addXp(n){s.xp=Math.min(100,s.xp+n)}
+  function can(id){return (req[id]||[]).every(isDone)}
+  function log(t,m){document.getElementById("logTitle").textContent=t;document.getElementById("logText").textContent=m}
+  function kill(id,name,val){if(total()<=val){log("⛔ Troppo forte",name+" ha potenza "+val+". Tu sei a "+total()+".");return false}s.energy+=val;addXp(1);mark(id);log("💥 Nemico eliminato",name+" sconfitto. Assorbi "+val+" energia.");return true}
+  function play(id){
+    if(isDone(id)||!can(id)||s.complete)return;
+    switch(id){
+      case "airlock":mark(id);addXp(5);log("🚪 Airlock aperto","Le luci d'emergenza lampeggiano.");break;
+      case "enemy4":kill(id,"Astronauta infetto",4);break;
+      case "junction":mark(id);addXp(5);log("🔀 Primo bivio","Una parete sembra cava.");break;
+      case "trap16":kill(id,"Predatore",16);break;
+      case "wall":mark(id);s.armor.push("Elmetto");addXp(15);log("🧱 Passaggio segreto","Trovi un Elmetto rinforzato: +5.");break;
+      case "enemy11":kill(id,"Drone armato",11);break;
+      case "armory":mark(id);s.weapon={name:"Mazza gravitazionale",icon:"🔨",bonus:5};addXp(15);log("🔨 Nuova arma","Mazza gravitazionale: +5.");break;
+      case "enemy27":kill(id,"Guardiano Xeno",27);break;
+      case "crate":mark(id);s.armor.push("Scudo");addXp(15);log("📦 Equipaggiamento","Scudo +5. Combo +5 attivata.");break;
+      case "terminal":mark(id);addXp(15);s.story="Registro 01: il Custode è arrivato dal settore superiore. Le navi alimentano il NUCLEO ROSSO.";log("📡 Registro 01",s.story);break;
+      case "enemy18":kill(id,"Comandante infetto",18);break;
+      case "boss":if(total()<=72){log("☠️ Custode Nero","Boss 72. Sei ancora troppo debole.");break}mark(id);s.energy+=72;addXp(29);s.complete=true;s.story="Il Custode Nero era solo il guardiano. Una navetta indica: PIATTAFORMA II.";log("🏆 VITTORIA","Custode Nero sconfitto. Potenza finale: "+total()+".");break;
+    }
+    save();render();
+  }
+  function render(){
+    document.getElementById("energy").textContent=s.energy;document.getElementById("total").textContent=total();
+    document.getElementById("weapon").textContent=s.weapon.icon+" "+s.weapon.name;document.getElementById("xp").textContent=s.xp;
+    document.getElementById("storyText").textContent=s.story;document.getElementById("objective").textContent=s.complete?"Livello completato":"Raggiungi il ponte di comando";
+    const inv=document.getElementById("inventory");inv.innerHTML="";let p=document.createElement("span");p.className="pill";p.textContent=s.weapon.icon+" "+s.weapon.name+" +"+s.weapon.bonus;inv.appendChild(p);
+    s.armor.forEach(a=>{let x=document.createElement("span");x.className="pill";x.textContent="🛡️ "+a;inv.appendChild(x)});
+    if(s.armor.length>=2){let x=document.createElement("span");x.className="pill";x.textContent="✨ Combo +5";inv.appendChild(x)}
+    document.querySelectorAll(".room").forEach(b=>{const id=b.dataset.id;b.disabled=isDone(id)||!can(id)||s.complete;b.classList.toggle("done",isDone(id))});
+  }
+  document.querySelectorAll(".room").forEach(b=>b.addEventListener("click",()=>play(b.dataset.id)));
+  document.getElementById("restart").addEventListener("click",()=>{s=fresh();save();log("↻ Riavviato","Maffolone torna all'ingresso.");render()});
+  render();
+  if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").catch(()=>{})}
+})();
+</script>
+</body></html>
